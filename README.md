@@ -25,6 +25,13 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 - CMAB online learning by updating the pretrained model based on the decisions made during the investigation
 - Monitoring tool to assess the performance of the last update as well as the overall model performance
 
+## Requirements
+- The MVP was created using Python 3.10
+- Required packages are listed in the file `requirements.txt`
+- It may be necessary to install `torch`and `torch_geometric` manually depending on the system. (For details please Manual Install of [`torch`] (https://pytorch.org/get-started/locally/) and [`torch_geometric`] (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
+- 
+
+
 ## Project Structure
 ```
 complai/
@@ -83,7 +90,7 @@ This is an educational project with simulated data and hypothetical predictions.
 This project is licensed under the MIT License.  
 You are free to use, modify, and distribute this software for personal or commercial purposes, provided you include the original copyright and license. 
 
-**Maintainder**: Florian Dahlbender | MSc BAM | RSM
+**Maintainer**: Florian Dahlbender | MSc BAM | RSM
 
 
    
