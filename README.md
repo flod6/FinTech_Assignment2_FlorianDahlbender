@@ -40,7 +40,7 @@ complai/
 │   └── utils/
 │       ├── utils_data_prep.py       # Utility functions for data generation
 │       ├── utils_train_GNN.py       # Utility functions to train the GNN
-│       └── utils_train_online_MAB   # Utiltiy functions to train the MAB online
+│       └── utils_train_online_MAB   # Utility functions to train the MAB online
 │
 ├── Application/
 │   ├── main.py                      # Script to run the app
@@ -61,13 +61,13 @@ cd FinTech_Assignment2_FlorianDahlbender
 ```
 
 2. Install Requirements
-```
+```bash
 pip install -r requirements.txt
 ```
 It may necessary to install `torch` and `torch_gemoteric` manually depending on the system.
 
 3. Run the Application
-```
+```bash
 cd Application
 streamlit run app.py
 ```
@@ -75,9 +75,15 @@ Or run the file `Application/main.py` directly in the python editor.
 
 
 ## Disclaimer
-This is an educational project with simulated data and hypohtetical predictions. 
+This is an educational project with simulated data and hypothetical predictions. 
 
-**Maintainder**: Florian Dahlbender | MSc BBAM | RSM
+## License 
+© 2025 Florian Dahlbender. All rights reserved.
+
+This project is licensed under the MIT License.  
+You are free to use, modify, and distribute this software for personal or commercial purposes, provided you include the original copyright and license. 
+
+**Maintainder**: Florian Dahlbender | MSc BAM | RSM
 
 
    
