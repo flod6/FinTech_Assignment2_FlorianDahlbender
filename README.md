@@ -71,8 +71,13 @@ It may necessary to install `torch` and `torch_gemoteric` manually depending on 
 cd Application
 streamlit run app.py
 ```
-Or run the file `Àpplication/main.py` directly in the python editor. 
+Or run the file `Application/main.py` directly in the python editor. 
 
+
+## Disclaimer
+This is an educational project with simulated data and hypohtetical predictions. 
+
+**Maintainder**: Florian Dahlbender | MSc BBAM | RSM
 
 
    
