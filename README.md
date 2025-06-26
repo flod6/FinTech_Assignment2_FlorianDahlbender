@@ -48,5 +48,14 @@ complai/
 │   └── utils/                 
 │       └── utils_app.py             # Utility functions for app the backend
 │
-└── README.md                  # Project Documentation
-``
+├── requirements.txt                 # Libraries and packages used for the MVP
+└── README.md                        # Project Documentation
+```
+
+## Installation Guide
+
+```
+git clone
+```
+
+
