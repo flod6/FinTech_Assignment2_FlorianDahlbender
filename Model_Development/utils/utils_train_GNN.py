@@ -42,7 +42,7 @@ def create_pyg_graph(graph):
 
     # Noramlize the node features
     scaler = StandardScaler()
-    graph_pyg.x = torch.tensor(scaler.fit_transform(graph_pyg.x.cpu()), dtype=torch.float32)
+    graph_pyg.x = torch.tensor(scaler.fit_transform(graph_pyg.x), dtype=torch.float32)
 
     return graph_pyg
 

@@ -36,7 +36,7 @@ st.set_page_config(
 )
 
 # Load the Image
-logo = Image.open(dir / "Data" / "ComplAI_logo.png")
+logo = Image.open(dir / "Data" / "Application_Data" / "ComplAI_logo.png")
 
 # Initialize session state
 if "page" not in st.session_state:

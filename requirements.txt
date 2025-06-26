@@ -1,13 +1,11 @@
 # Core libraries
-numpy
+numpy==1.26.4
 pandas
 scikit-learn
 matplotlib
 Pillow
 
 # Neural Network and Graph Neural Network Libraries
-torch                 	# Manually install appropriate version if needed
-torch-geometric      	# May need manual installation depending on the system
 networkx             
 
 # MAB Libraries
