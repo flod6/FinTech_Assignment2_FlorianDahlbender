@@ -26,10 +26,12 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 - Monitoring tool to assess the performance of the last update as well as the overall model performance
 
 ## Project Structure
-'''
-complaining/
-|
-|–– Data/
-    |–– Processed
-
-'''
+```
+complai/
+├── Data/
+│   ├── Processed/
+│   └── Application_Data/
+├── Model_Development/
+│   ├── 
+│   
+``
