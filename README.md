@@ -54,8 +54,26 @@ complai/
 
 ## Installation Guide
 
+1. Clone the repository
 ```
-git clone
+git clone https://github.com/flod6/FinTech_Assignment2_FlorianDahlbender.git
+cd FinTech_Assignment2_FlorianDahlbender
 ```
+
+2. Install Requirements
+```
+pip install -r requirements.txt
+```
+
+3. Run the Application
+```
+cd Application
+streamlit run app.py
+```
+Or run the file ``Àpplication/main.py``` directly in the python editor. 
+
+
+
+   
 
 
