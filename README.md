@@ -28,8 +28,12 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 ## Requirements
 - The MVP was created using Python 3.10
 - Required packages are listed in the file `requirements.txt`
-- It may be necessary to install `torch`and `torch_geometric` manually depending on the system. (For details please Manual Install of [`torch`] (https://pytorch.org/get-started/locally/) and [`torch_geometric`] (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
-- 
+- It may be necessary to install `torch`and `torch_geometric` manually depending on the system. (For details please Manual Install of `torch` (https://pytorch.org/get-started/locally/) and `torch_geometric` (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
+- Depending on your system it may also be necessary to install the following `torch_geometric` dependencies:
+  - `torch_scatter`
+  - `torch_sparse`
+  - `torch_cluster`
+  - `torch_spline_conv`
 
 
 ## Project Structure
