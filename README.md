@@ -64,14 +64,14 @@ cd FinTech_Assignment2_FlorianDahlbender
 ```
 pip install -r requirements.txt
 ```
-It may necessary to install torch and torch_gemoteric manually depending on the system.
+It may necessary to install `torch` and `torch_gemoteric` manually depending on the system.
 
 3. Run the Application
 ```
 cd Application
 streamlit run app.py
 ```
-Or run the file ``Àpplication/main.py``` directly in the python editor. 
+Or run the file `Àpplication/main.py` directly in the python editor. 
 
 
 
