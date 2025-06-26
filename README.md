@@ -64,6 +64,7 @@ cd FinTech_Assignment2_FlorianDahlbender
 ```
 pip install -r requirements.txt
 ```
+It may necessary to install torch and torch_gemoteric manually depending on the system.
 
 3. Run the Application
 ```
