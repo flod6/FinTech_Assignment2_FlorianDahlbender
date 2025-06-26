@@ -22,16 +22,31 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 - User interface using new simulated data and graphs
 - Automatic generation of embeddings and predictions on simulated data
 - Dashboard to investigate suspicious accounts and make decisions
-- CMAB online learning by updating the model based on the decisions made during the investigation
+- CMAB online learning by updating the pretrained model based on the decisions made during the investigation
 - Monitoring tool to assess the performance of the last update as well as the overall model performance
 
 ## Project Structure
 ```
 complai/
-├── Data/
-│   ├── Processed/
-│   └── Application_Data/
-├── Model_Development/
-│   ├── 
-│   
+├── Data/                      
+│   ├── Processed/                   # Contains all data and graphs used for model training
+│   └── Application_Data/            # Contains the history of investigated accounts and the logo
+│ 
+├── Model_Development/          
+│   ├── data_simulations.py          # Generator for synthetic transaction data
+│   ├── train_GNN.py                 # GNN training script
+│   ├── train_MAB.py                 # CMAB training script
+│   ├── Models/                      # Stores the pretrained model
+│   └── utils/
+│       ├── utils_data_prep.py       # Utility functions for data generation
+│       ├── utils_train_GNN.py       # Utility functions to train the GNN
+│       └── utils_train_online_MAB   # Utiltiy functions to train the MAB online
+│
+├── Application/
+│   ├── main.py                      # Script to run the app
+│   ├── app.py                       # Streamlit front end for the app
+│   └── utils/                 
+│       └── utils_app.py             # Utility functions for app the backend
+│
+└── README.md                  # Project Documentation
 ``
