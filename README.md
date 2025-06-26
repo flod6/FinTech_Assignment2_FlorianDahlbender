@@ -12,6 +12,7 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 
 **GNN Layer**
 - Pretrained GNN model using unsupervised learning
+- Leverages transactions represented in a graph structure
 - Embeddings generator for each account
 
 **MAB Layer**
@@ -28,8 +29,25 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 ## Requirements
 - The MVP was created using Python 3.12
 - Required packages are listed in the file `requirements.txt`
-- The installation of `torch` and `torch_geometric` must be performed manually due as the correct version depends on the users system. (For details please Manual Install of `torch` (https://pytorch.org/get-started/locally/) and `torch_geometric` (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
+- The installation of `torch` and `torch_geometric` must be performed manually, as the correct version depends on the user's system. For details please see official installation instructions:
+     - `torch` (https://pytorch.org/get-started/locally/)
+     - `torch_geometric` (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
 
+## Tech Stack
+- **Programming Language**:
+     - `Python 3.12`
+- **Front End**:
+     - `Streamlit` (UI)
+- **Back End & ML**:
+     - `torch` (GNN)
+     - `torch_geometric` (GNN)
+     - `mabwiser` (CMAB)
+     - `scikit-learn` (Model Evaluation)
+- **Utilities**:
+     - `pandas` (Data Processing)
+     - `numpy` (Data Processing)
+     - `matplotlib` (Data Visualization)
+     - `networkx` (Graph Creation)
 
 ## Project Structure
 ```
@@ -52,7 +70,7 @@ complai/
 │   ├── main.py                      # Script to run the app
 │   ├── app.py                       # Streamlit front end for the app
 │   └── utils/                 
-│       └── utils_app.py             # Utility functions for app the backend
+│       └── utils_app.py             # Utility functions for the app backend
 │
 ├── requirements.txt                 # Libraries and packages used for the MVP
 └── README.md                        # Project Documentation
@@ -72,13 +90,12 @@ conda create -n complai_env python=3.12
 conda activate complai_env
 ```
 
-
-4. Install Requirements
+3. Install Requirements
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Install `torch` and `torch_geometric` manually as the version depends on the users system
+4. Install `torch` and `torch_geometric` manually, as the version depends on the user's system
 - `torch`: (https://pytorch.org/get-started/locally/)
 - `torch_geometric`: (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
 
@@ -89,9 +106,16 @@ streamlit run app.py
 ```
 Or run the file `Application/main.py` directly in the python editor. 
 
+## Academic Context
+This MVP was built as part of an academic assignment for the course FinTech: Business Models & Applications (BM26BAM), for the academic program MSc Business Analytics & Management, at Rotterdam School of Management, Erasmus University. 
+
+## Future Outlook
+- Train the models on real transaction data
+- Improve GNN architecture and fine-tuning under a supervised setting
+- Bank software integration and add pipeline to other departments
+
 ## Keywords
 **`FinTech`**, **`AML`**, **`Graph Neural Networks`**, **`Multi Armed Bandit`**
-
 
 ## Disclaimer
 This is an educational project with simulated data and hypothetical predictions. 
