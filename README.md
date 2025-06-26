@@ -19,8 +19,17 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 - Classification by leveraging the embeddings
 
 **ComplAI UI Pipeline**
-- User interface using new simulated data
+- User interface using new simulated data and graphs
 - Automatic generation of embeddings and predictions on simulated data
 - Dashboard to investigate suspicious accounts and make decisions
 - CMAB online learning by updating the model based on the decisions made during the investigation
 - Monitoring tool to assess the performance of the last update as well as the overall model performance
+
+## Project Structure
+'''
+complaining/
+|
+|–– Data/
+    |–– Processed
+
+'''
