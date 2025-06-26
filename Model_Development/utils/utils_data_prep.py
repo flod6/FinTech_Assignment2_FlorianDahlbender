@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 # Define Function to Generate Simulated Transaction Data
-def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing, num_smurfing_deposits):
+def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing, num_smurfing_deposits, seed=187):
 
     """
     Generates a DataFrame simulating transactions between accounts with 
@@ -32,10 +32,14 @@ def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing
     chain_length (int): Length of each layering chain.
     n_smurfing (int): Number of accounts to simulate smurfing.
     num_smurfing_deposits (int): Number of smurfing deposits per account.
+    seed (int): Random seed for reproducibility.
     
     Returns:
     pd.DataFrame: A DataFrame containing simulated transaction data including layering and smurfing transactions.
     """
+
+    # Set seed for reproducibility
+    np.random.seed(seed)
     
     # Generate random account IDs
     accounts = [f"A_{i}" for i in range(n_accounts)]
@@ -43,8 +47,9 @@ def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing
     # Randomly select senders, receivers, amounts, and timestamps
     senders = np.random.choice(accounts, n_transactions)
     receivers = np.random.choice(accounts, n_transactions)
-    amounts = np.random.exponential(scale=2500, size=n_transactions) 
-    timestamps = pd.date_range("2023-01-01", periods=n_transactions, freq='h')
+    amounts = np.random.exponential(scale=1000, size=n_transactions) 
+    timestamps = (pd.date_range("2025-06-01", periods=n_transactions, freq='min') + pd.to_timedelta(
+                 np.random.randint(0, 3600, n_transactions), unit='s'))
     
     # Create DataFrame by merging items together
     df = pd.DataFrame({
@@ -93,15 +98,22 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
 
         # Randomly select accounts for the chain
         chain = np.random.choice(accounts, chain_length, replace=False)
+        base_time = np.random.choice(timestamps)
+
+        # Define time offset
+        time_offset = 0
 
         # Iterate over the chain length 
         for j in range(chain_length - 1):
 
+            # Define time offset for the transaction
+            time_offset += np.random.randint(1, 4)
+
             df = pd.concat([df, pd.DataFrame({
                 "sender": [chain[j]],
                 "receiver": [chain[j + 1]],
-                "amount": [10000 + np.random.normal(0, 500)],
-                "timestamp": [timestamps.max() + pd.Timedelta(hours = i*5 + j)],
+                "amount": [10000 + np.random.normal(0, 200)], # 500
+                "timestamp": [base_time + pd.Timedelta(hours=time_offset)],
                 "is_suspicious": [1]  # Flag as suspicious
                 })])
             
@@ -125,13 +137,14 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
                 # Define the direction of the transaction
                 direction = np.random.choice(["send", "receive"])
                 sender, receiver = (k, partner) if direction == "send" else (partner, k)
+                noise_time = base_time + pd.Timedelta(hours=np.random.randint(1, 10))
 
                 # Append the noise transaction to the DataFrame
                 df = pd.concat([df, pd.DataFrame({
                     "sender": [sender],
                     "receiver": [receiver],
-                    "amount": [np.random.exponential(scale=200)],
-                    "timestamp": [timestamps.max() + pd.Timedelta(hours = np.random.randint(1,50))],
+                    "amount": [np.random.exponential(scale=100)],
+                    "timestamp": [noise_time],
                     "is_suspicious": [0]  # Not flagged as suspicious
                     })])
             
@@ -157,29 +170,35 @@ def add_smurfing(df, accounts, timestamps, n_smurfing, num_smurfing_deposits):
     pd.DataFrame: A DataFrame with added smurfing transactions.
     """
 
-
-    # Define target acounts that receive smurfing 
+    # Define target accounts that receive smurfing 
     targets = np.random.choice(accounts, n_smurfing, replace=False)
 
     # Iterate over the target accounts
     for target in targets:
 
+        # Set base time
+        base_time = np.random.choice(timestamps)
+
         # Iterate over the number of smurfing deposits
         for _ in range(num_smurfing_deposits):
+
+           # for _ in range(np.random.randint(10, 15)):
 
             # Randomly select sender accounts
             sender = np.random.choice(accounts)
 
+            # Set deposit time
+            deposit_time = base_time + pd.Timedelta(minutes=np.random.randint(0, 3))
+
             # Append the smurfing transaction to the DataFrame
             df = pd.concat([df, pd.DataFrame({
-                "sender": [sender],
-                "receiver": [target],
-                "amount": [900 + np.random.normal(0, 100)],
-                "timestamp": [timestamps.max() + pd.Timedelta(hours=np.random.randint(1, 100))],
-                "is_suspicious": [1]  # Flag as suspicious
+                    "sender": [sender],
+                    "receiver": [target],
+                    "amount": [950 + np.random.normal(0, 100)], 
+                    "timestamp": [deposit_time],
+                    "is_suspicious": [1] # Flag as suspicious
             })])
 
-    
         # Add noise to the smurfing transactions by letting the accounts receive money from other accounts
         # and let the target send money to other accounts
 
@@ -200,20 +219,47 @@ def add_smurfing(df, accounts, timestamps, n_smurfing, num_smurfing_deposits):
             direction = np.random.choice(["send", "receive"])
             sender, receiver = (target, partner) if direction == "send" else (partner, target)
 
+            # Add time
+            noise_time = base_time + pd.Timedelta(minutes=np.random.randint(10, 90))
+
             # Append the noise transaction to the DataFrame
             df = pd.concat([df, pd.DataFrame({
                 "sender": [sender],
                 "receiver": [receiver],
-                "amount": [np.random.exponential(scale=300)],
-                "timestamp": [timestamps.max() + pd.Timedelta(hours = np.random.randint(1, 150))],
+                "amount": [np.random.exponential(scale=500)],
+                "timestamp": [noise_time + pd.Timedelta(hours=np.random.randint(1, 150))],
                 "is_suspicious": [0]  # Not flagged as suspicious
-                })])
+            })])
             
     # Return the DataFrame with smurfing transactions added
-    return df 
+    return df
 
 
+# Define a function to extract all accounts and their labels
+def extract_all_accounts(df):
+    """
+    Extract all acounts and their respective labels. 
 
+    Parameters:
+    df (pd.DataFrame): DataFrame containing transaction data with 'is_suspicious' column.
+
+    Returns:
+    pd.DataFrame: DataFrame with unique accounts and their labels indicating if they are suspicious.    
+    """
+    # Get all suspicious accounts
+    suspicious_accounts = set(df[df["is_suspicious"] == 1]["receiver"])
+
+    # Extract all unique accounts from the DataFrame
+    all_accounts = set(df["sender"]) | set(df["receiver"])
+
+    # Create a DataFrame with all accounts and their labels
+    accounts_df = pd.DataFrame({
+        "account_id": list(all_accounts),
+        "is_suspicious": [1 if account in suspicious_accounts else 0 for account in all_accounts]
+    })
+
+    # Return all the suspicious accounts
+    return accounts_df
 
 
 #----------------------------------
@@ -233,6 +279,10 @@ def create_graph(df):
     nx.DiGraph: A directed graph representing the transactions.
     """
 
+
+    # Min Max normalize the timestamps
+    df["timestamp"] = (df["timestamp"] - df["timestamp"].min()) / (df["timestamp"].max() - df["timestamp"].min())
+
     # Create empty directed graph object
     G = nx.DiGraph()
 
@@ -242,39 +292,48 @@ def create_graph(df):
     # Add the accounts as nodes to the graph
     G.add_nodes_from(accounts)
 
+    # Add account ID as to the nodes
+    for i, account in enumerate(G.nodes()):
+        G.nodes[account]["account_id"] = account
+
     # Add edges to the graph for each transaction
 
     # Iterate over the rows to add edges
     for _, row in df.iterrows():
         
-        # Add edge from sender to receiver with the transactions information
+        # Add edge from sender to receiver with the transactions information as
         # edge features
+        edge_features = [float(row["amount"]), float(row["timestamp"])]
+
         G.add_edge(
             row["sender"], 
-            row["receiver"], 
-            amount=row["amount"], 
-            timestamp=row["timestamp"]
+            row["receiver"],
+            edge_attr = edge_features
         )
 
     
     ## Add node attributes for all the accounts
 
-    # Total Outgoing Amount
-    outgoing = df.groupby("sender")["amount"].sum().to_dict()
-    nx.set_node_attributes(G, outgoing, "total_sent")
+    # Get node level features
+    features_df = pd.DataFrame(index=accounts)
+    features_df["total_sent"] = df.groupby("sender")["amount"].sum()
+    features_df["total_received"] = df.groupby("receiver")["amount"].sum()
+    features_df["transactions_sent"] = df.groupby("sender").size()
+    features_df["transactions_received"] = df.groupby("receiver").size()
+    features_df["avg_amount_sent"] = df.groupby("sender")["amount"].mean()
+    features_df["avg_amount_received"] = df.groupby("receiver")["amount"].mean()
+    features_df["std_amount_sent"] = df.groupby("sender")["amount"].std()
+    features_df["std_amount_received"] = df.groupby("receiver")["amount"].std()
+    features_df["unique_partners_sent"] = df.groupby("sender")["receiver"].nunique()
+    features_df["unique_partners_received"] = df.groupby("receiver")["sender"].nunique()
+    features_df = features_df.fillna(0)
 
-    # Total Incoming Amount
-    incoming = df.groupby("receiver")["amount"].sum().to_dict()
-    nx.set_node_attributes(G, incoming, "total_received")
 
-    # Number of Transactions sent
-    transactions_sent = df.groupby("sender").size().to_dict()
-    nx.set_node_attributes(G, transactions_sent, "transactions_sent")
+    # Append features to the graph nodes
+    for account in G.nodes():
+        G.nodes[account]["x"] = features_df.loc[account].values.astype(np.float32)
 
-    # Number of Transactions received
-    transactions_received = df.groupby("receiver").size().to_dict()
-    nx.set_node_attributes(G, transactions_received, "transactions_received")
-
+    # Return the graph object
     return G
 
 
@@ -341,7 +400,6 @@ def plot_graph(graph, df, limit_nodes):
     graph (networkx.DiGraph): The directed graph to plot.
     df (pd.DataFrame): DataFrame containing transaction data for labeling nodes.
 
-
     Returns:
     None: Displays the graph plot.
     """
@@ -378,3 +436,4 @@ def plot_graph(graph, df, limit_nodes):
     plt.axis('off')
     plt.tight_layout()
     plt.show()
+
