@@ -26,14 +26,9 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 - Monitoring tool to assess the performance of the last update as well as the overall model performance
 
 ## Requirements
-- The MVP was created using Python 3.10
+- The MVP was created using Python 3.12
 - Required packages are listed in the file `requirements.txt`
-- It may be necessary to install `torch`and `torch_geometric` manually depending on the system. (For details please Manual Install of `torch` (https://pytorch.org/get-started/locally/) and `torch_geometric` (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
-- Depending on your system it may also be necessary to install the following `torch_geometric` dependencies:
-  - `torch_scatter`
-  - `torch_sparse`
-  - `torch_cluster`
-  - `torch_spline_conv`
+- The installation of `torch` and `torch_geometric` must be performed manually due as the correct version depends on the users system. (For details please Manual Install of `torch` (https://pytorch.org/get-started/locally/) and `torch_geometric` (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
 
 
 ## Project Structure
@@ -65,24 +60,37 @@ complai/
 
 ## Installation Guide
 
-1. Clone the repository
+1. Clone the Repository
 ```
 git clone https://github.com/flod6/FinTech_Assignment2_FlorianDahlbender.git
 cd FinTech_Assignment2_FlorianDahlbender
 ```
 
-2. Install Requirements
+2. Create new Environment
+```
+conda create -n complai_env python=3.12
+conda activate complai_env
+```
+
+
+4. Install Requirements
 ```bash
 pip install -r requirements.txt
 ```
-It may necessary to install `torch` and `torch_gemoteric` manually depending on the system.
 
-3. Run the Application
+4. Install `torch` and `torch_geometric` manually as the version depends on the users system
+- `torch`: (https://pytorch.org/get-started/locally/)
+- `torch_geometric`: (https://pytorch-geometric.readthedocs.io/en/2.6.1/install/installation.html)
+
+5. Run the Application
 ```bash
 cd Application
 streamlit run app.py
 ```
 Or run the file `Application/main.py` directly in the python editor. 
+
+## Keywords
+`**FinTech**`, `**AML**`, `**Graph Neural Networks**`, `**Multi Armed Bandit**`
 
 
 ## Disclaimer
