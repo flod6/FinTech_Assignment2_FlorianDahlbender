@@ -90,7 +90,7 @@ streamlit run app.py
 Or run the file `Application/main.py` directly in the python editor. 
 
 ## Keywords
-`**FinTech**`, `**AML**`, `**Graph Neural Networks**`, `**Multi Armed Bandit**`
+**`FinTech`**, **`AML`**, **`Graph Neural Networks`**, **`Multi Armed Bandit`**
 
 
 ## Disclaimer
