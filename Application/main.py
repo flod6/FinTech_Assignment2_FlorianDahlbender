@@ -5,7 +5,6 @@
 # Load Packages
 import os
 from pathlib import Path
-import numpy as np
 
 # Set paths
 dir = Path(__file__).resolve().parent.parent
@@ -14,9 +13,8 @@ dir = Path(__file__).resolve().parent.parent
 app_path = dir / "Application" / "app.py"
 app_path_str = str(app_path)
 
+#----------------------------------
+# 2. Run App
+#----------------------------------
+
 os.system(f'STREAMLIT_EMAIL_PROMPT=false streamlit run "{app_path_str}"')
-
-# Set Seed
-np.random.seed(6)
-
-

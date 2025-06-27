@@ -16,11 +16,9 @@ import torch_geometric as pyg
 from sklearn.preprocessing import StandardScaler
 import torch.nn.functional as F
 
-
 #----------------------------------
-# 2. Data Simulation Functions and Objects
+# 2. Functions and Objects to train the GNN model
 #----------------------------------
-
 
 # Define Function to convert graph into a PyTorch Geometric Data object
 def create_pyg_graph(graph):
@@ -44,14 +42,15 @@ def create_pyg_graph(graph):
     scaler = StandardScaler()
     graph_pyg.x = torch.tensor(scaler.fit_transform(graph_pyg.x), dtype=torch.float32)
 
+    # Return the pyg Graph 
     return graph_pyg
-
 
 
 # Create the GNN model
 class GraphSage(nn.Module):
     """
-    GNN model to generate embeddings. For the application GraphSage is used.
+    GraphSage model class for node embeddings using PyTorch Geometric. No activation function is applied
+    as the model is trained unsupervised and no direct predictions are made.
 
     Parameters:
     in_channels (int): The number of input features per node.
@@ -59,7 +58,7 @@ class GraphSage(nn.Module):
     num_layers (int): The number of layers in the GNN.
     out_channels (int): The number of output features per node.
     dropout (float, optional): Dropout rate for regularization. 
-    aggregator (str, optional): The aggregation method to use ('mean', 'max', 'lstm', etc.). 
+    aggregator (str, optional): The aggregation method to use. 
                                     Defaults to 'mean'.
 
     Forward Pass:
@@ -71,6 +70,7 @@ class GraphSage(nn.Module):
         torch.Tensor: Output node embeddings of shape [num_nodes, out_channels].
     """
 
+    # Set up init method of the class
     def __init__(self, 
                  in_channels: int,
                  hidden_channels: int, 
@@ -98,9 +98,11 @@ class GraphSage(nn.Module):
 
     # Define forward pass of the GNN model
     def forward(self, x, edge_index):
+        # Loop over the layer
         for conv in self.convs[:-1]:
             x = F.relu(conv(x, edge_index))
             x = self.dropout(x)
+        # Apply the last layer without activation
         x = self.convs[-1](x, edge_index)
         return x
 
@@ -109,7 +111,8 @@ class GraphSage(nn.Module):
 def corruption(x, edge_index): 
     """
     Introduces randomness to the input data by shuffling the node features.
-    To generate more robust representations. 
+    To generate more robust representations and is required to the unsupervised
+    training of the model.
 
     Parameters:
     x (torch.Tensor): Node feature matrix of shape [num_nodes, in_channels].
@@ -118,9 +121,11 @@ def corruption(x, edge_index):
     Returns:
     torch.Tensor: Corrupted node feature matrix with the same shape as x.
     """
-    # Introduce more noise
+
+    # Generate random noise
     noise = torch.randn_like(x) * 0.05
 
+    # Shuffle the node features and add noise
     return x[torch.randperm(x.size(0))] + noise, edge_index
 
 
@@ -145,7 +150,7 @@ def run_epoch(num_epochs, model, graph, optimizer):
         # Zero the gradients
         optimizer.zero_grad()
 
-        # Create embeddings / Foreward pass
+        # Create embeddings / Forward pass
         pos_z, neg_z, summary = model(graph.x, graph.edge_index)
 
         # Derive the loss
@@ -161,7 +166,7 @@ def run_epoch(num_epochs, model, graph, optimizer):
         if epoch % 10 == 0:
             print(f'Epoch {epoch}, Loss: {loss.item()}')
 
-    # Return the trained model
+    # Return the model
     return model
 
 
@@ -184,7 +189,6 @@ def train_model(model, graph, num_epochs):
     model (torch.nn.Module): The trained GNN model.
     """
 
-
     # Set decive 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -192,7 +196,7 @@ def train_model(model, graph, num_epochs):
     model = model.to(device)
     graph = graph.to(device)
 
-    # Define optimizer
+    # Define optimizer and learning rate
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     # Set model to training mode  

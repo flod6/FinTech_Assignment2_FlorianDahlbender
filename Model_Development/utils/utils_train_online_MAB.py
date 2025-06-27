@@ -10,22 +10,22 @@ and creating and training the Multi-Armed Bandit (MAB) model.
 # Load Packages 
 import pandas as pd
 import numpy as np
-from mabwiser.mab import MAB, LearningPolicy, NeighborhoodPolicy
-from sklearn.utils import resample
+from mabwiser.mab import MAB, LearningPolicy
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
-
 #----------------------------------
-# 1. Define Functions and Objects
+# 2. Define Functions and Objects
 #----------------------------------
 
-
-# Define Reward function
+# Define Reward function 
 def reward_function(row):
     """
-    Reward function to evaluate the actions taken on accounts.
+    Reward function to evaluate the actions taken on accounts and provide the MAB
+    with feedback based on the action taken and whether the account is suspicious.
+    The reward are constructed in a way that reflect the economic costs of the decision and
+    to tune the MAB in a meaniful way. For instance, missing a suspicious account, is more 
+    costly than investigating a non-suspicious account due to high fines.
 
     Parameters:
     row (pd.Series): A row from the DataFrame containing account information.
@@ -37,7 +37,7 @@ def reward_function(row):
     # Positive reward for investigating suspicious accounts
     if row["is_suspicious"] == 1 and row["action_taken"] == "investigate":
         return 5 
-    # Positive reward for ignoring non-suspicious accounts
+    # No Reward for ignoring non-suspicious accounts
     elif row["is_suspicious"] == 0 and row["action_taken"] == "ignore":
         return 0
     # Negative reward for ignoring suspicious accounts
@@ -55,8 +55,8 @@ def setup_mab_model(arms, policy, explore, seed, cont):
     Set up the MAB model with the specified arms and policy.
 
     Parameters:
-    arms (list): List of arms to be used in the MAB model.
-    policy (str): The learning policy to be used.
+    arms (list): List of arms to be used in the MAB model to reflect the decisions.
+    policy (str): The learning policy to be used. LinUCB or LinTS possible
     explore (float): The exploration rate for the MAB model.
     seed (int): Random seed for reproducibility.
     cont (np.ndarray): Context features for the MAB model.
@@ -112,18 +112,20 @@ def training_loop(mab, X, y, arms):
 
         # Choose an arm and action
         choosen_arm = mab.predict([context])
+
+        # Define the reward
         reward = reward_function(pd.Series({
             "is_suspicious": label,
             "action_taken": choosen_arm
         }))
 
-        # Get optimal reward
+        # Get optimal reward that could be achieved
         optimal_reward = max([reward_function(pd.Series({
             "is_suspicious": label,
             "action_taken": arm
         })) for arm in arms])
         
-        # Update the MAB model
+        # Update the MAB model based on the reward and decision
         mab.partial_fit(decisions=[choosen_arm], rewards=[reward], contexts=[context])
 
         # Track Metrics
@@ -145,7 +147,7 @@ def training_loop(mab, X, y, arms):
     # Save training history
     history_df = pd.DataFrame(history)
 
-    # Return items
+    # Return model and history of decisions
     return mab, history_df
 
 # Define Function to generate plots for MAB training history
@@ -160,8 +162,6 @@ def generate_plots(history_df):
     Returns:
     None: Displays plots of cumulative reward, cumulative regret, average regret, and average reward.
     """
-    
-    plt.figure(figsize=(6, 6))
 
     # Plot Cumulative Regret
     plt.figure(figsize=(6, 6))
@@ -234,7 +234,6 @@ def evaluate_MAB(history_df, last_n=1000):
     # Extract true labels and predicted actions
     true_labels = recent_history["true_label"].values
     predicted_actions = recent_history["chosen_arm"].apply(lambda x: 1 if x == "investigate" else 0).values
-
 
     # Calculate accuracy, confusion matrix, and classification report
     accuracy = accuracy_score(true_labels, predicted_actions)

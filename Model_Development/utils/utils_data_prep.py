@@ -12,7 +12,6 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-
 #----------------------------------
 # 2. Data Simulation Functions and Objects
 #----------------------------------
@@ -20,7 +19,6 @@ import matplotlib.pyplot as plt
 
 # Define Function to Generate Simulated Transaction Data
 def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing, num_smurfing_deposits, seed=187):
-
     """
     Generates a DataFrame simulating transactions between accounts with 
     layering and smurfing activities.
@@ -44,7 +42,7 @@ def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing
     # Generate random account IDs
     accounts = [f"A_{i}" for i in range(n_accounts)]
     
-    # Randomly select senders, receivers, amounts, and timestamps
+    # Randomly select senders, receivers, amounts, and timestamps to create transactions
     senders = np.random.choice(accounts, n_transactions)
     receivers = np.random.choice(accounts, n_transactions)
     amounts = np.random.exponential(scale=1000, size=n_transactions) 
@@ -60,11 +58,10 @@ def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing
         "is_suspicious": 0  # Placeholder for suspicious flag
     })
 
-
-    # Add Layering to the transactions
+    # Add Layering to the transactions as AML transactions
     df = add_layering(df, accounts, timestamps, n_chains, chain_length)
 
-    # Add Smurfing to the transactions
+    # Add Smurfing to the transactions as AML transactions
     df = add_smurfing(df, accounts, timestamps, n_smurfing, num_smurfing_deposits)
 
     # Drop Accounts that send money to themselves
@@ -79,7 +76,8 @@ def generate_data(n_accounts, n_transactions, n_chains, chain_length, n_smurfing
 def add_layering(df, accounts, timestamps, n_chains, chain_length):
 
     """
-    Adds layering to the transaction data by creating chains of transactions
+    Adds layering to the transaction data by creating chains of transactions to represents
+    AML activities in the transactions.
 
     Parameters:
     df (pd.DataFrame): The original transaction DataFrame.
@@ -89,8 +87,7 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
     chain_length (int): Length of each layering chain.
 
     Returns:
-    pd.DataFrame: A DataFrame with added layering transactions.
-    
+    pd.DataFrame: A transactions dataframe DataFrame with added layering transactions.
     """
 
     # Iterate over the number of chains in the data
@@ -98,9 +95,11 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
 
         # Randomly select accounts for the chain
         chain = np.random.choice(accounts, chain_length, replace=False)
+
+        # Set base time for the chain
         base_time = np.random.choice(timestamps)
 
-        # Define time offset
+        # Define base time offset between the transactions
         time_offset = 0
 
         # Iterate over the chain length 
@@ -109,6 +108,7 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
             # Define time offset for the transaction
             time_offset += np.random.randint(1, 4)
 
+            # Add the transaction to the DataFrame
             df = pd.concat([df, pd.DataFrame({
                 "sender": [chain[j]],
                 "receiver": [chain[j + 1]],
@@ -118,7 +118,7 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
                 })])
             
 
-        # Add non-suspicious transactions to these accounts
+        # Add non-suspicious transactions to these accounts by creating some noise
         for k in chain:
 
             # Define number of noise transactions
@@ -130,13 +130,15 @@ def add_layering(df, accounts, timestamps, n_chains, chain_length):
                 # Randomly select account for noise transaction
                 partner = np.random.choice(accounts)
 
-                # Checke that the partner is not the same as the current account
+                # Check that the partner is not the same as the current account
                 if partner == k:
                     continue
 
                 # Define the direction of the transaction
                 direction = np.random.choice(["send", "receive"])
                 sender, receiver = (k, partner) if direction == "send" else (partner, k)
+
+                # Get time stamp of the transaction
                 noise_time = base_time + pd.Timedelta(hours=np.random.randint(1, 10))
 
                 # Append the noise transaction to the DataFrame
@@ -176,15 +178,13 @@ def add_smurfing(df, accounts, timestamps, n_smurfing, num_smurfing_deposits):
     # Iterate over the target accounts
     for target in targets:
 
-        # Set base time
+        # Set base time for the transactions
         base_time = np.random.choice(timestamps)
 
         # Iterate over the number of smurfing deposits
         for _ in range(num_smurfing_deposits):
 
-           # for _ in range(np.random.randint(10, 15)):
-
-            # Randomly select sender accounts
+            # Randomly select sender accounts that send money to the target account
             sender = np.random.choice(accounts)
 
             # Set deposit time
@@ -198,6 +198,7 @@ def add_smurfing(df, accounts, timestamps, n_smurfing, num_smurfing_deposits):
                     "timestamp": [deposit_time],
                     "is_suspicious": [1] # Flag as suspicious
             })])
+
 
         # Add noise to the smurfing transactions by letting the accounts receive money from other accounts
         # and let the target send money to other accounts
@@ -238,7 +239,7 @@ def add_smurfing(df, accounts, timestamps, n_smurfing, num_smurfing_deposits):
 # Define a function to extract all accounts and their labels
 def extract_all_accounts(df):
     """
-    Extract all acounts and their respective labels. 
+    Extract all acounts and their respective labels. Needed later for model evaluation
 
     Parameters:
     df (pd.DataFrame): DataFrame containing transaction data with 'is_suspicious' column.
@@ -246,7 +247,9 @@ def extract_all_accounts(df):
     Returns:
     pd.DataFrame: DataFrame with unique accounts and their labels indicating if they are suspicious.    
     """
-    # Get all suspicious accounts
+
+    # Get all suspicious accounts that are defined as receivers of on of the 
+    # suspicious transactions 
     suspicious_accounts = set(df[df["is_suspicious"] == 1]["receiver"])
 
     # Extract all unique accounts from the DataFrame
@@ -279,6 +282,8 @@ def create_graph(df):
     nx.DiGraph: A directed graph representing the transactions.
     """
 
+    # Create a copy of the DataFrame to avoid modifying the original
+    df = df.copy()
 
     # Min Max normalize the timestamps
     df["timestamp"] = (df["timestamp"] - df["timestamp"].min()) / (df["timestamp"].max() - df["timestamp"].min())
@@ -296,8 +301,8 @@ def create_graph(df):
     for i, account in enumerate(G.nodes()):
         G.nodes[account]["account_id"] = account
 
-    # Add edges to the graph for each transaction
 
+    # Add edges to the graph for each transaction
     # Iterate over the rows to add edges
     for _, row in df.iterrows():
         
@@ -305,15 +310,15 @@ def create_graph(df):
         # edge features
         edge_features = [float(row["amount"]), float(row["timestamp"])]
 
+        # Append the edges
         G.add_edge(
             row["sender"], 
             row["receiver"],
             edge_attr = edge_features
         )
 
-    
-    ## Add node attributes for all the accounts
 
+    ## Add node attributes for all the accounts
     # Get node level features
     features_df = pd.DataFrame(index=accounts)
     features_df["total_sent"] = df.groupby("sender")["amount"].sum()
@@ -405,11 +410,7 @@ def plot_graph(graph, df, limit_nodes):
     """
 
     # Identify suspicoius accounts
-    suspicious_accounts = set(df[df["is_suspicious"] == 1]["sender"]) | \
-                          set(df[df["is_suspicious"] == 1]["receiver"])
-    
-    print(len(suspicious_accounts), "suspicious accounts identified.")
-
+    suspicious_accounts = set(df[df["is_suspicious"] == 1]["receiver"])
 
     # Create Subgraph if necessary
     if limit_nodes is not None and graph.number_of_nodes() > limit_nodes:
@@ -427,9 +428,6 @@ def plot_graph(graph, df, limit_nodes):
 
     # Draw edges
     nx.draw_networkx_edges(graph, pos, arrowstyle='-|>', arrowsize=10, edge_color='gray', alpha=0.5)
-
-    # Draw labels
-    # nx.draw_networks_labels(graph, pos, font_size=8)
 
     # Define reamining parameters
     plt.title("Transaction Graph")

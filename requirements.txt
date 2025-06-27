@@ -5,7 +5,7 @@ scikit-learn
 matplotlib
 Pillow
 
-# Neural Network and Graph Neural Network Libraries
+# Graph Library
 networkx             
 
 # MAB Libraries

@@ -8,23 +8,17 @@ It includes functions for loading data, processing inputs, and generating visual
 """
 
 # Load Packages
-import streamlit as st
 import pandas as pd
-import numpy as np
 from pathlib import Path
-import matplotlib.pyplot as plt
 import networkx as nx
 import random
 import pickle
 import torch 
-import torch.nn as nn
-import torch.nn.functional as F
 import torch_geometric as pyg
 import sys
 
 # Set system path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-
 
 # Import custom functions
 from Model_Development.utils.utils_data_prep import generate_data, create_graph, extract_all_accounts
@@ -39,17 +33,18 @@ dir = Path(__file__).resolve().parent.parent.parent
 random.seed(6)
 torch.manual_seed(6)
 
-
-
 #----------------------------------
 # 2. Define Function to Run the App
 #---------------------------------- 
 
 
-# Define function to simulate new data
+# Define function to simulate new data for the application
 def generate_test_data(): 
     """
     Generates a DataFrame with random data for testing purposes.
+
+    Parameters:
+    None
     
     Returns:
         pd.DataFrame: A DataFrame with random values.
@@ -84,13 +79,12 @@ def generate_test_data():
 
 
 # Define function to create embedding for the graph
-def generate_test_embeddings(graph, accounts):
+def generate_test_embeddings(graph):
     """
     Generates a random embedding for the provided graph.
     
     Parameters:
     graph (networkx.Graph): The graph for which to generate embeddings.
-    accounts (list): List of account IDs corresponding to the nodes in the graph.
     
     Returns:
     embeddings (pd.Dataframe): A dataframe that contains the embeddings for each node in the graph
@@ -99,7 +93,7 @@ def generate_test_embeddings(graph, accounts):
     # Create PyTorch Geometric graph
     graph_pyg = create_pyg_graph(graph)
 
-    # Set up the GNN model
+    # Set up the GNN model that was employed in the Model Development phase
     encoder = GraphSage(
         in_channels=graph_pyg.num_node_features,
         hidden_channels=64,
@@ -120,13 +114,12 @@ def generate_test_embeddings(graph, accounts):
     
     # Set model to evaluation mode
     model.eval()
-
     
     # Extract the node embeddings
     with torch.no_grad():
         node_embeddings = model.encoder(graph_pyg.x, graph_pyg.edge_index)
 
-    # Extract node IDs 
+    # Extract node IDs and append to embeddings
     node_ids = graph_pyg.account_id 
     embeddings = pd.DataFrame(node_embeddings)
     embeddings.insert(0, "account_id", node_ids)
@@ -147,13 +140,14 @@ def make_test_predictions(embeddings):
     predictions pd.DataFrame: DataFrame with predictions added.
     """
     
-    # Load the mab model
+    # Load the mab model from the development phase
     with open(dir / "Model_Development" / "Models" / "mab_model.pkl", "rb") as f:
         mab = pickle.load(f)
 
     # Make predictions using the mab model
     predictions = mab.predict(embeddings.drop(columns=["account_id"]).values)
 
+    # Return the predictions
     return predictions
 
 
@@ -176,15 +170,14 @@ def extract_suspicious_accounts(df, graph, accounts, embeddings, predictions):
 
 
     # Call created functions
-    df, graph, accounts = generate_test_data()
-    embeddings = generate_test_embeddings(graph, accounts)
+    embeddings = generate_test_embeddings(graph)
     predictions = make_test_predictions(embeddings)
 
-    # Merge data 
+    # Merge embeddings with predictions
     embeddings["predictions"] = predictions
 
     # Extract all flagged accounts
-    flagged_accounts = embeddings[embeddings["predictions"] == "investigate"]#["account_id"].tolist()
+    flagged_accounts = embeddings[embeddings["predictions"] == "investigate"]
 
     # Create DF that is displayed
     flagged_df = pd.DataFrame(flagged_accounts, columns=["account_id", "predictions"])
@@ -212,9 +205,6 @@ def create_investigate_elements(flagged_df, selected_account, transactions):
     received_transactions (pd.DataFrame): DataFrame containing transactions received by the selected account.
     G (networkx.Graph): Graph representation of the transactions for the selected account.
     """
-    
-    # Call Function to get the transactions
-    #transactions = generate_test_data()[0]
 
     # Filter transactions for the selected account
     account_transactions = transactions[
@@ -276,15 +266,13 @@ def create_investigate_elements(flagged_df, selected_account, transactions):
         "timestamp": "Timestamp"
     })
 
-        # Extract all transactions to create a network graph for the selected account
+    # Extract all transactions to create a network graph for the selected account
     G = nx.from_pandas_edgelist(
         account_transactions,
         source="sender",
         target="receiver",
         edge_attr="amount",
-        create_using=nx.DiGraph()
-    )
-
+        create_using=nx.DiGraph())
 
     # Return the elements
     return node_features, sent_transactions, received_transactions, G
@@ -298,7 +286,7 @@ def update_model(embeddings, investigated_accounts):
 
     Parameters:
     embeddings (pd.DataFrame): DataFrame containing node embeddings.
-    suspicious_accounts (pd.DataFrame): DataFrame containing suspicious accounts.
+    investigated_accounts (pd.DataFrame): DataFrame containing accounts that have been investigated.
     
     Returns:
     df (pd.DataFrame): DataFrame with updated rewards and actions for all flagged accounts.
@@ -314,9 +302,8 @@ def update_model(embeddings, investigated_accounts):
     # Join the dataframes
     df = df.merge(investigated_accounts, left_on="account_id", right_on="Account", how="left")
 
-    # Rename function
-    df.rename(columns={"Decision": "is_suspicious", "Flag": "action_taken"}, inplace=True)
-
+    # Rename columns
+    df.rename(columns={"Decision": "is_suspicious", "Prediction": "action_taken"}, inplace=True)
     
     # Change values in column Decision to match the reward function
     df["is_suspicious"] = df["is_suspicious"].replace({"Fraud": 1, "Not Fraud": 0})
@@ -343,7 +330,6 @@ def update_model(embeddings, investigated_accounts):
 
 # Define function to get the monitoring results
 def monitor_items(results): 
-
     """
     Create items that are used during the monitoring phase of the app.
 
@@ -351,12 +337,13 @@ def monitor_items(results):
     results (pd.DataFrame): DataFrame containing the results of the monitoring phase.
 
     Returns:
-        None
+    correct_predictions (pd.DataFrame): DataFrame containing correctly predicted accounts.
+    incorrect_predictions (pd.DataFrame): DataFrame containing incorrectly predicted accounts.
+    overall_results (pd.DataFrame): DataFrame containing the overall results of the monitoring phase.
     """
 
     # Map action_taken to numeric predictions
     action_map = {"investigate": 1, "ignore": 0}
-    #results = results.copy()
     results["predicted_label"] = results["action_taken"].map(action_map)
 
     # Filter all correctly predicted accounts
@@ -383,9 +370,7 @@ def monitor_items(results):
         "reward": "Reward"
     })
 
-    # Compute the results for the overall statistics
-
-    # Check if the file exists
+    # Check if the overall summary already file exists if now a new one is created
     file_path = dir / "Data" / "Application_Data" / "monitoring_results.csv"
     if file_path.exists():
         overall_results = pd.read_csv(file_path)
@@ -397,6 +382,8 @@ def monitor_items(results):
         run_number = overall_results["Run"].max() + 1
     else:
         run_number = 1
+
+    # Append the number of the run
     correct_predictions["Run"] = run_number
     incorrect_predictions["Run"] = run_number
 
@@ -407,10 +394,11 @@ def monitor_items(results):
     # Store the overall results
     overall_results.to_csv(file_path, index=False)
     
+    # Return the items
     return correct_predictions, incorrect_predictions, overall_results
 
 
-# Make function to get the overall results
+# Make function to get the overall results if now accounts has been investigated yet
 def get_overall_results():
 
     # Load the file with the overall results
@@ -420,6 +408,7 @@ def get_overall_results():
     else:
         overall_results = pd.DataFrame(columns=["Account ID", "Actual Label", "Predicted Label", "Action Taken", "Reward", "Run"])
 
+    # Return the data frame
     return overall_results
 
 
@@ -443,6 +432,7 @@ def monitor_plot(overall_results):
     accuracy_per_run = []
     false_positive_rate_per_run = []
 
+    # Calculate accuracy and false positive rate for each run
     for run in runs:
         run_data = overall_results[overall_results["Run"] == run]
         accuracy = (run_data["Actual Label"] == 1).sum() / len(run_data)

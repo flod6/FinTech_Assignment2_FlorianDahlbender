@@ -2,15 +2,11 @@
 # 1. Set Up
 #----------------------------------
 
-
 # Load Packages
 import pandas as pd
 import numpy as np
 from pathlib import Path
-import networkx as nx
-import matplotlib.pyplot as plt
 import pickle
-
 
 # Import Custiom Objects and Functions
 from Model_Development.utils.utils_data_prep import (generate_data, 
@@ -22,14 +18,12 @@ from Model_Development.utils.utils_data_prep import (generate_data,
 # Set paths
 dir = Path(__file__).resolve().parent.parent
 
-
 # Set Random Seed
 np.random.seed(187)
 
 #----------------------------------
-# 2. Simulate Data
+# 2. Simulate Transaction Data
 #----------------------------------
-
 
 # Define Number of Accounts and Transactions
 n_accounts = 5000
@@ -52,16 +46,12 @@ df.to_csv(dir / "Data" / "Processed" / "simulated_transactions.csv", index=False
 # Extract all accounts with positive labels / i.e. accounts that are part of a layering chain or smurfing
 all_accounts = extract_all_accounts(df)
 
-# Retrive number of positive cases
-n_positive_cases = all_accounts[all_accounts["is_suspicious"] == 1].shape[0]
-
 # Store all accounts to a CSV file
 all_accounts.to_csv(dir / "Data" / "Processed" / "accounts_train.csv", index=False)
 
 #----------------------------------
 # 3. Create Graph
 #----------------------------------
-
 
 # Create the graph from the DataFrame
 graph = create_graph(df)
@@ -75,7 +65,3 @@ plot_graph(graph, df, limit_nodes=250)
 # Store the graph to a file
 with open(dir / "Data" / "Processed" / "simulated_graph.gpickle", "wb") as f:
     pickle.dump(graph, f)
-
-
-
-
