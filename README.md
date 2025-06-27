@@ -12,7 +12,7 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 
 **GNN Layer**
 - Pretrained GNN model using unsupervised learning
-     - **GraphSAGE** architecture for capturing local graph structure
+     - **GraphSAGE** architecture for capturing local graph structure (It was also tried to employ a model that directly can comprehend edge attributes. However, the **GraphSage** model performed better and therefore used for the MVP)
      - Trained with **Deep Graph Infomax** for unsupervised node representation learning
 - Leverages transactions represented in a graph structure
 - Embeddings generator for each account
