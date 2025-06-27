@@ -12,11 +12,15 @@ ComplAI is a modular FinTech solution that detects accounts involved in money la
 
 **GNN Layer**
 - Pretrained GNN model using unsupervised learning
+     - **GraphSAGE** architecture for capturing local graph structure
+     - Trained with **Deep Graph Infomax** for unsupervised node representation learning
 - Leverages transactions represented in a graph structure
 - Embeddings generator for each account
 
 **MAB Layer**
-- Pretrained CMAB model trained online
+- Pretrained CMAB model trained
+     - Thompson Sampling CMAB algorithm to make decision 
+     - Trained through online learning
 - Classification by leveraging the embeddings
 
 **ComplAI UI Pipeline**
