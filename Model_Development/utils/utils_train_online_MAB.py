@@ -161,9 +161,10 @@ def generate_plots(history_df):
     None: Displays plots of cumulative reward, cumulative regret, average regret, and average reward.
     """
     
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(6, 6))
 
     # Plot Cumulative Regret
+    plt.figure(figsize=(6, 6))
     plt.plot(history_df["iteration"], history_df["cumulative_regret"], label="Cumulative Regret", color="orange")
     plt.xlabel("Iteration")
     plt.ylabel("Value")
@@ -174,6 +175,7 @@ def generate_plots(history_df):
     plt.show()
 
     # Plot Cumulative Reward
+    plt.figure(figsize=(6, 6))
     plt.plot(history_df["iteration"], history_df["cumulative_reward"], label="Cumulative Reward")
     plt.xlabel("Iteration")
     plt.ylabel("Value")
@@ -187,8 +189,8 @@ def generate_plots(history_df):
     history_df["average_regret"] = history_df["cumulative_regret"] / (history_df["iteration"] + 1)
 
     # Plot average regret over time
-    plt.figure(figsize=(12, 5))
-    plt.plot(history_df["iteration"], history_df["average_regret"], label="Average Regret", color="green")
+    plt.figure(figsize=(10, 8))
+    plt.plot(history_df["iteration"], history_df["average_regret"], label="Average Regret", color="lightgreen")
     plt.xlabel("Iteration")
     plt.ylabel("Average Regret")
     plt.title("Average Regret Over Time")
@@ -201,8 +203,8 @@ def generate_plots(history_df):
     history_df["average_reward"] = history_df["cumulative_reward"] / (history_df["iteration"] + 1)
 
     # Plot average regret over time
-    plt.figure(figsize=(12, 5))
-    plt.plot(history_df["iteration"], history_df["average_reward"], label="Average Reward", color="red")
+    plt.figure(figsize=(10, 8))
+    plt.plot(history_df["iteration"], history_df["average_reward"], label="Average Reward", color="blue")
     plt.xlabel("Iteration")
     plt.ylabel("Average Reward")
     plt.title("Average Reward Over Time")
