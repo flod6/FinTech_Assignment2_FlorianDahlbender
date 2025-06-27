@@ -101,7 +101,7 @@ pip install -r requirements.txt
 
 5. Run the Application
 ```bash
-cd Application
+cd FinTech_Assignment2_FlorianDahlbender/Application
 streamlit run app.py
 ```
 Or run the file `Application/main.py` directly in the python editor. 
